@@ -21,9 +21,9 @@ class ProductService{
     private $dbh;
 
     /**
-     * @var
+     * @var text dbPrefix
      */
-    private $dbPrefix = '';
+    private $dbPrefix = $dbConfig['prefix'];
 
     public function __construct()
     {
