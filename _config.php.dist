@@ -6,6 +6,7 @@ return [
         'dbname' => 'magento_db',
         'username' => 'user',
         'passwd' => 'password',
+        'prefix' => '',
     ],
     'base_url' => 'http://localhost:9200/product-raw/type/'
 ];
