@@ -23,7 +23,7 @@ class ProductService{
     /**
      * @var
      */
-    private $dbPrefix = 'sg_';
+    private $dbPrefix = '';
 
     public function __construct()
     {
@@ -45,44 +45,44 @@ class ProductService{
     public function getData(int $limit = 100, int $offset = 0, $threads = null, $seed = null)
     {
         $sql = 'SELECT 
-                    cpe.*,
+                    catalog_product_entity.*,
                     categories_aggregated.category_id,
                     categories_aggregated.category_name,
                     res.rating_summary,
                     res.reviews_count,
                     ciss.qty as stock_quantity
-                FROM ' . $this->dbPrefix . 'catalog_product_entity cpe
+                FROM ' . $this->dbPrefix . 'catalog_product_entity catalog_product_entity
                 LEFT JOIN (
                     SELECT 
-                        ccp.product_id, 
-                        ccp.category_id, 
-                        ccev.value as category_name
+                        catalog_category_product.product_id, 
+                        catalog_category_product.category_id, 
+                        catalog_category_entity_varchar.value as category_name
                     
-                    FROM ' . $this->dbPrefix . 'catalog_category_product ccp
+                    FROM ' . $this->dbPrefix . 'catalog_category_product catalog_category_product
                     INNER JOIN ' . $this->dbPrefix . 'catalog_category_entity cce
-                    ON ccp.category_id = cce.entity_id
-                    INNER JOIN ' . $this->dbPrefix . 'catalog_category_entity_varchar ccev
-                    ON ccev.row_id = ccp.category_id
+                    ON catalog_category_product.category_id = cce.entity_id
+                    INNER JOIN ' . $this->dbPrefix . 'catalog_category_entity_varchar catalog_category_entity_varchar
+                    ON catalog_category_entity_varchar.entity_id = catalog_category_product.category_id
                     INNER JOIN ' . $this->dbPrefix . 'eav_attribute ea
-                    ON ea.attribute_id = ccev.attribute_id
+                    ON ea.attribute_id = catalog_category_entity_varchar.attribute_id
                     WHERE  ea.entity_type_id=3 AND store_id = 0 AND attribute_code = "name"
                 ) categories_aggregated
-                ON cpe.row_id = categories_aggregated.product_id
+                ON catalog_product_entity.entity_id = categories_aggregated.product_id
                 
                 LEFT JOIN
                 (SELECT * FROM ' . $this->dbPrefix . 'review_entity_summary WHERE entity_type = 1 AND store_id = 0 ) res
-                ON cpe.row_id = res.entity_pk_value
+                ON catalog_product_entity.entity_id = res.entity_pk_value
                 
                 LEFT JOIN
                 (SELECT * FROM ' . $this->dbPrefix . 'cataloginventory_stock_status WHERE stock_id = 1 AND website_id = 0 ) ciss
-                ON cpe.row_id = ciss.product_id
+                ON catalog_product_entity.entity_id = ciss.product_id
                 
-                WHERE 1 = 1 #AND row_id = 43871 
+                WHERE 1 = 1 #AND entity_id = 43871 
                 
                 ';
 
         if($threads && $seed !== null){
-            $sql .= ' AND row_id % ' . $threads . ' = ' . $seed;
+            $sql .= ' AND entity_id % ' . $threads . ' = ' . $seed;
         }
 
         $sql .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
@@ -103,7 +103,7 @@ class ProductService{
      * @return array
      */
     public function getRow(array $row){
-        $id = $row['row_id'];
+        $id = $row['entity_id'];
         $data = [
             'id' => $row['entity_id'],
             'sku' => $row['sku'],
@@ -151,64 +151,64 @@ class ProductService{
     private function getEavAttributes($entityId){
         $sql = '
             (SELECT
-                  row_id,
+                  entity_id,
                 attribute_code,
                 frontend_label,
                 value,
                 is_user_defined,
                 store_id
-            FROM ' . $this->dbPrefix . 'catalog_product_entity_varchar cpe
+            FROM ' . $this->dbPrefix . 'catalog_product_entity_varchar catalog_product_entity
             INNER JOIN ' . $this->dbPrefix . 'eav_attribute ea
-            ON ea.attribute_id = cpe.attribute_id
-            WHERE cpe.row_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
+            ON ea.attribute_id = catalog_product_entity.attribute_id
+            WHERE catalog_product_entity.entity_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
             )
             
             UNION
             
             (
             SELECT
-                  row_id,
+                  entity_id,
                 attribute_code,
                 frontend_label,
                 value,
                 is_user_defined,
                 store_id
-            FROM ' . $this->dbPrefix . 'catalog_product_entity_text cpe
+            FROM ' . $this->dbPrefix . 'catalog_product_entity_text catalog_product_entity
             INNER JOIN ' . $this->dbPrefix . 'eav_attribute ea
-            ON ea.attribute_id = cpe.attribute_id
-            WHERE cpe.row_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
+            ON ea.attribute_id = catalog_product_entity.attribute_id
+            WHERE catalog_product_entity.entity_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
             )
             
             UNION
             
             (
             SELECT
-                  row_id,
+                  entity_id,
                 attribute_code,
                 frontend_label,
                 value,
                 is_user_defined,
                 store_id
-            FROM ' . $this->dbPrefix . 'catalog_product_entity_int cpe
+            FROM ' . $this->dbPrefix . 'catalog_product_entity_int catalog_product_entity
             INNER JOIN ' . $this->dbPrefix . 'eav_attribute ea
-            ON ea.attribute_id = cpe.attribute_id
-            WHERE cpe.row_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
+            ON ea.attribute_id = catalog_product_entity.attribute_id
+            WHERE catalog_product_entity.entity_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
             )
             
             UNION
             
             (
             SELECT
-                  row_id,
+                  entity_id,
                 attribute_code,
                 frontend_label,
                 value,
                 is_user_defined,
                 store_id
-            FROM ' . $this->dbPrefix . 'catalog_product_entity_decimal cpe
+            FROM ' . $this->dbPrefix . 'catalog_product_entity_decimal catalog_product_entity
             INNER JOIN ' . $this->dbPrefix . 'eav_attribute ea
-            ON ea.attribute_id = cpe.attribute_id
-            WHERE cpe.row_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
+            ON ea.attribute_id = catalog_product_entity.attribute_id
+            WHERE catalog_product_entity.entity_id = :entity_id AND ea.entity_type_id=4 AND store_id = 0
             )';
 
         $stmt = $this->dbh->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
