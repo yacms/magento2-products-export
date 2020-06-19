@@ -11,12 +11,15 @@ This script works via SQL queries, to improve performance.
 Tested on Magento 2.2.2, Core i7 2.5.
 Exported 8653 products per minute
 
+Update Mike / yacms
+Rewrote Databasenames, droped Magento 2 2.2.x support, Added Magento 2.3.x support.
+
 ## Install, usage
 
 1 . Clone repository
 
 ```
-https://github.com/antonshell/magento2-products-export.git
+https://github.com/yacms/magento2-products-export.git
 ```
 
 2 . Set database connection and base url
